@@ -2,39 +2,36 @@ import streamlit as st
 import tensorflow as tf
 import numpy as np
 from PIL import Image
-import io
 
-# Load model once at the start
+# Load model
 model = tf.keras.models.load_model('trained_model.h5')
 
-# TensorFlow model prediction
+# Prediction function
 def model_predict(image):
-    # image is already PIL Image object
-    image = image.resize((128, 128))  # Resize to match model input
-    input_arr = np.array(image)  # Convert to array
-    input_arr = np.expand_dims(input_arr, axis=0)  # Add batch dimension
-    input_arr = input_arr / 255.0  # Normalize
+    image = image.resize((128, 128))
+    input_arr = np.array(image)
+    input_arr = np.expand_dims(input_arr, axis=0)
+    input_arr = input_arr / 255.0
     prediction = model.predict(input_arr)
-    result_index = np.argmax(prediction)  # Get index of highest probability
-    return result_index
+    return prediction
 
-# Streamlit Sidebar
+# Streamlit App
 st.sidebar.title("Dashboard")
 app_mode = st.sidebar.selectbox("Choose the app mode", ["Prediction"])
 
-# Prediction page
 if app_mode == "Prediction":
     st.title("Crop Disease Prediction")
 
     uploaded_file = st.file_uploader("Upload an image of the crop leaf", type=['jpg', 'png', 'jpeg'])
 
     if uploaded_file is not None:
-        # Read the uploaded image as PIL Image
-        test_image = Image.open(uploaded_file)
+        test_image = Image.open(uploaded_file)  # <<< CONVERT IMMEDIATELY
         st.image(test_image, use_container_width=True)
 
         if st.button("Predict"):
-            result_index = model_predict(test_image)  # Pass PIL Image directly
+            prediction = model_predict(test_image)
+            result_index = np.argmax(prediction)
+
             class_name = ['Apple___Apple_scab',
                          'Apple___Black_rot',
                          'Apple___Cedar_apple_rust',
