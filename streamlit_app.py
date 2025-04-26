@@ -8,33 +8,33 @@ import io
 model = tf.keras.models.load_model('trained_model.h5')
 
 # TensorFlow model prediction
-def model_predict(test_image):
-    # Load and preprocess image
-    image = Image.open(test_image)  # Open image using PIL
-    image = image.resize((128, 128))  # Resize to match the model's expected input size
-    input_arr = np.array(image)  # Convert image to array
+def model_predict(image):
+    # image is already PIL Image object
+    image = image.resize((128, 128))  # Resize to match model input
+    input_arr = np.array(image)  # Convert to array
     input_arr = np.expand_dims(input_arr, axis=0)  # Add batch dimension
-    input_arr = input_arr / 255.0  # Normalize if your model was trained on normalized images
-
-    # Make prediction
+    input_arr = input_arr / 255.0  # Normalize
     prediction = model.predict(input_arr)
-    result_index = np.argmax(prediction)  # Get index of the highest predicted class
+    result_index = np.argmax(prediction)  # Get index of highest probability
     return result_index
 
 # Streamlit Sidebar
 st.sidebar.title("Dashboard")
-app_mode = st.sidebar.selectbox("Choose the app mode", [ "Prediction"])
+app_mode = st.sidebar.selectbox("Choose the app mode", ["Prediction"])
 
 # Prediction page
 if app_mode == "Prediction":
     st.title("Crop Disease Prediction")
-    test_image = st.file_uploader("Upload an image of the crop leaf", type=['jpg', 'png', 'jpeg'])
-    
-    if test_image is not None:
+
+    uploaded_file = st.file_uploader("Upload an image of the crop leaf", type=['jpg', 'png', 'jpeg'])
+
+    if uploaded_file is not None:
+        # Read the uploaded image as PIL Image
+        test_image = Image.open(uploaded_file)
         st.image(test_image, use_container_width=True)
-        
+
         if st.button("Predict"):
-            result_index = model_predict(test_image)  # Call the prediction function
+            result_index = model_predict(test_image)  # Pass PIL Image directly
             class_name = ['Apple___Apple_scab',
                          'Apple___Black_rot',
                          'Apple___Cedar_apple_rust',
@@ -76,3 +76,5 @@ if app_mode == "Prediction":
                          
             st.success(f"Model predicts: {class_name[result_index]}")
             st.balloons()
+    else:
+        st.warning("Please upload an image to proceed!")
