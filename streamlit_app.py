@@ -25,8 +25,8 @@ if app_mode == "Prediction":
     uploaded_file = st.file_uploader("Upload an image of the crop leaf", type=['jpg', 'png', 'jpeg'])
 
     if uploaded_file is not None:
-        test_image = Image.open(uploaded_file)  # <<< CONVERT IMMEDIATELY
-        st.image(test_image, use_container_width=True)
+        test_image = Image.open(uploaded_file)
+        st.image(test_image)
 
         if st.button("Predict"):
             prediction = model_predict(test_image)
